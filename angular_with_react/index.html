@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+</head>
+<body ng-app="fasterAngular">
+<h1>Fast AngularJs</h1> <h3>AngularJs with ReactJs</h3>
+<div ng-controller="mycontroller">
+    <button ng-click="refresh()">Refresh Data</button>
+    <fast-repeat data="data"></fast-repeat>
+    <!-- <table>
+      <tr ng-repeat="line in data" ng-click="clickHandler(ev)">
+        <td>{{line[0]}}</td>
+        <td>{{line[1]}}</td>
+        <td>{{line[2]}}</td>
+        <td>{{line[3]}}</td>
+        <td>{{line[4]}}</td>
+      </tr>
+    </table> -->
+</div>
+
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/react/react.js"></script>
+
+<script >
+    var MYLIST = React.createClass({displayName: 'MYLIST',
+        render: function() {
+
+            var data = this.props.data;
+
+            var rows = data.map(function(datum) {
+                var clickHandler = function(ev){
+                    console.log("Still in reactJs");
+                    console.log(ev);
+                }
+
+                return (
+                        React.DOM.tr( {onClick:clickHandler},
+                                React.DOM.td(null, datum['0']),
+                                React.DOM.td(null, datum['1']),
+                                React.DOM.td(null, datum['2']),
+                                React.DOM.td(null, datum['3']),
+                                React.DOM.td(null, datum['4'])
+                        )
+                );
+            });
+
+            return (
+                    React.DOM.table(null,
+                            rows
+                    )
+            );
+        }
+    });
+</script>
+<script>
+    angular.module('fasterAngular', []).
+    controller('mycontroller', ['$scope', function($scope){
+        $scope.framework = 'ReactJs';
+        $scope.data = [];
+        // Fill the data map with random data
+
+        $scope.clickHandler = function(){
+            console.log("in AngularJS");
+        }
+        $scope.refresh = function(){
+            for(var i = 0; i < 1500; ++i) {
+                $scope.data[i] = {};
+                for(var j = 0; j < 5; ++j) {
+                    $scope.data[i][j] = Math.random();
+                }
+            }
+        }
+        $scope.refresh()
+    }]).directive('fastRepeat', function(){
+        return{
+            restrict: 'E',
+            scope:{
+                data: '='
+            },
+            link:function(scope, el, attrs){
+                scope.$watchCollection('data', function(newValue, oldValue){
+                    React.renderComponent(
+                            MYLIST({data:newValue}),
+                            el[0]
+                    );
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>
